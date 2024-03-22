@@ -114,3 +114,44 @@ export const forgotPassword = async ({ email }: ForgotPasswordProps) => {
     };
   }
 };
+
+interface ResetPasswordProps {
+  uid: string;
+  token: string;
+  newPassword: string;
+  reNewPassword: string;
+}
+
+export const resetPassword = async ({ uid, token, newPassword, reNewPassword }: ResetPasswordProps) => {
+  try {
+    const body = JSON.stringify({
+      uid,
+      token,
+      new_password: newPassword,
+      re_new_password: reNewPassword,
+    });
+
+    //パスワード再設定
+    const apiRes = await fetch(`${process.env.API_URL}/api/auth/users/reset_password_confirm/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+
+    if (!apiRes.ok) {
+      return {
+        success: false,
+      };
+    }
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+    };
+  }
+};
