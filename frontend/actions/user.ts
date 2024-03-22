@@ -80,3 +80,37 @@ export const completeSignup = async ({ uid, token }: CompleteSignupProps) => {
     };
   }
 };
+
+interface ForgotPasswordProps {
+  email: string;
+}
+
+export const forgotPassword = async ({ email }: ForgotPasswordProps) => {
+  try {
+    const body = JSON.stringify({
+      email,
+    });
+    //パスワード再設定
+    const apiRes = await fetch(`${process.env.API_URL}/api/auth/users/reset_password/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+
+    if (!apiRes.ok) {
+      return {
+        success: false,
+      };
+    }
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+    };
+  }
+};
