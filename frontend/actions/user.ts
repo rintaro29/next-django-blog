@@ -40,3 +40,43 @@ export const temporarrySignup = async ({ name, email, password, rePassword }: Te
     };
   }
 };
+
+interface CompleteSignupProps {
+  uid: string;
+  token: string;
+}
+
+export const completeSignup = async ({ uid, token }: CompleteSignupProps) => {
+  try {
+    const body = JSON.stringify({
+      uid,
+      token,
+    });
+
+    //アカウント本登録
+    const apiRes = await fetch(`${process.env.API_URL}/api/auth/users/activation/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+
+    //apiRes.okがfalseの場合、本登録失敗として処理
+    if (!apiRes.ok) {
+      return {
+        success: false,
+      };
+    }
+    //成功を返す
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    //エラーが発生した場合、本登録失敗として処理
+    return {
+      success: false,
+    };
+  }
+};
