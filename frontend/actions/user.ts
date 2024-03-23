@@ -155,3 +155,45 @@ export const resetPassword = async ({ uid, token, newPassword, reNewPassword }: 
     };
   }
 };
+
+export interface UserDetailType {
+  uid: string;
+  name: string;
+  email: string;
+  avatar: string | undefined;
+  introduction: string;
+  created_at: string;
+}
+
+interface GetUserDetailProps {
+  userId: string;
+}
+
+export const getUserDetail = async ({ userId }: GetUserDetailProps) => {
+  try {
+    //ユーザー詳細取得
+    const apiRes = await fetch(`${process.env.API_URL}/api/users/${userId}/`, {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!apiRes.ok) {
+      return {
+        success: false,
+        user: null,
+      };
+    }
+
+    const user: UserDetailType = await apiRes.json();
+    return {
+      success: true,
+      user,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      user: null,
+    };
+  }
+};
