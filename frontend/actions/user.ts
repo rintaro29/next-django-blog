@@ -197,3 +197,50 @@ export const getUserDetail = async ({ userId }: GetUserDetailProps) => {
     };
   }
 };
+
+interface UpdateUserProps {
+  accessToken: string;
+  name: string;
+  introduction: string | undefined;
+  avatar: string | undefined;
+}
+
+export const updateUser = async ({ accessToken, name, introduction, avatar }: UpdateUserProps) => {
+  try {
+    const body = JSON.stringify({
+      name,
+      introduction,
+      avatar,
+    });
+
+    //ユーザー情報更新
+    const apiRes = await fetch(`${process.env.API_URL}/api/auth/users/me/`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `JWT ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+    //レスポンスが正常でない場合、失敗とnullを返す
+    if (!apiRes.ok) {
+      return {
+        success: false,
+        user: null,
+      };
+    }
+    //レスポンスをjsonとして解析し、ユーザー情報を取得する
+    const user: UserDetailType = await apiRes.json();
+
+    return {
+      success: true,
+      user,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      user: null,
+    };
+  }
+};
