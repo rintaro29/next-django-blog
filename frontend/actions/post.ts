@@ -156,3 +156,27 @@ export const updatePost = async ({ accessToken, postId, title, content, image }:
 
   return { success: true };
 };
+interface DeletePostType {
+  accessToken: string;
+  postId: string;
+}
+
+// 投稿削除
+export const deletePost = async ({ accessToken, postId }: DeletePostType) => {
+  const options = {
+    method: "DELETE",
+    headers: {
+      Authorization: `JWT ${accessToken}`,
+    },
+  };
+
+  // 投稿削除を送信
+  const result = await fetchAPI(`/api/posts/${postId}/`, options);
+
+  if (!result.success) {
+    console.error(result.error);
+    return { success: false };
+  }
+
+  return { success: true };
+};

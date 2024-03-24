@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
-import { PostType } from "@/actions/post";
+import { PostType, deletePost } from "@/actions/post";
 import { UserType } from "@/lib/nextauth";
 import Image from "next/image";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { Button } from "../ui/button";
 
 interface PostDetailProps {
   post: PostType;
@@ -14,6 +18,39 @@ interface PostDetailProps {
 
 // 投稿詳細
 const PostDetail = ({ post, user }: PostDetailProps) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 削除ボタンクリック時の処理
+  const handleDeletePost = async () => {
+    setIsLoading(true);
+    if (post.user.uid !== user?.uid) {
+      toast.error("投稿は削除できません");
+      return;
+    }
+
+    try {
+      // 投稿削除
+      const res = await deletePost({
+        accessToken: user.accessToken,
+        postId: post.uid,
+      });
+
+      if (!res.success) {
+        toast.error("投稿の削除に失敗しました");
+        return;
+      }
+
+      toast.success("投稿を削除しました");
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      toast.error("投稿の削除に失敗しました");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="aspect-[16/9] relative">
@@ -53,6 +90,16 @@ const PostDetail = ({ post, user }: PostDetailProps) => {
               <Pencil className="w-5 h-5" />
             </div>
           </Link>
+
+          <button
+            type="button"
+            aria-label="削除"
+            className="hover:bg-gray-100 p-2 rounded-full"
+            disabled={isLoading}
+            onClick={handleDeletePost}
+          >
+            <Trash2 className="w-5 h-5 text-red-500" />
+          </button>
         </div>
       )}
     </div>
