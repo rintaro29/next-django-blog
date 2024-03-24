@@ -82,3 +82,40 @@ export const getPostDetail = async ({ postId }: { postId: string }) => {
 
   return { success: true, post };
 };
+
+interface CreatePostType {
+  accessToken: string;
+  title: string;
+  content: string;
+  image: string | undefined;
+}
+
+// 新規投稿
+export const createPost = async ({ accessToken, title, content, image }: CreatePostType) => {
+  const body = JSON.stringify({
+    title: title,
+    content: content,
+    image: image,
+  });
+
+  const options = {
+    method: "POST",
+    headers: {
+      Authorization: `JWT ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body,
+  };
+
+  // 新規投稿を送信
+  const result = await fetchAPI("/api/posts/", options);
+
+  if (!result.success) {
+    console.error(result.error);
+    return { success: false, post: null };
+  }
+
+  const post: PostType = await result.data;
+
+  return { success: true, post };
+};
