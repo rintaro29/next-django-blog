@@ -101,6 +101,7 @@ export const createPost = async ({ accessToken, title, content, image }: CreateP
   const options = {
     method: "POST",
     headers: {
+      // JWT トークンを使って認証
       Authorization: `JWT ${accessToken}`,
       "Content-Type": "application/json",
     },

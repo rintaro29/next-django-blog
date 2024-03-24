@@ -58,6 +58,7 @@ const PostNew = ({ user }: PostNewProps) => {
     try {
       // 新規投稿
       const res = await createPost({
+        // ユーザーのアクセストークン認証
         accessToken: user.accessToken,
         title: data.title,
         content: data.content,
@@ -100,6 +101,7 @@ const PostNew = ({ user }: PostNewProps) => {
         <div className="mb-3">
           <FormLabel>サムネイル</FormLabel>
           <div className="mt-2">
+            {/* ここから画像 */}
             <ImageUploading
               value={imageUpload}
               onChange={onChangeImage}
@@ -108,6 +110,7 @@ const PostNew = ({ user }: PostNewProps) => {
             >
               {({ imageList, onImageUpload, onImageUpdate, dragProps }) => (
                 <div className="w-full">
+                  {/* 画像が投稿されてない時の処理 */}
                   {imageList.length == 0 && (
                     <button
                       onClick={onImageUpload}
@@ -130,6 +133,7 @@ const PostNew = ({ user }: PostNewProps) => {
                     </div>
                   ))}
 
+                  {/* 画像が投稿されてない時の処理 */}
                   {imageList.length > 0 && (
                     <div className="text-center mt-3">
                       <Button variant="outline" onClick={() => onImageUpdate(0)}>
