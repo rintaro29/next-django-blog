@@ -62,3 +62,23 @@ export const getPostList = async () => {
 
   return { success: true, posts };
 };
+
+// 投稿詳細取得
+export const getPostDetail = async ({ postId }: { postId: string }) => {
+  const options: RequestInit = {
+    method: "GET",
+    cache: "no-store",
+  };
+
+  // 投稿詳細取得
+  const result = await fetchAPI(`/api/post-detail/${postId}/`, options);
+
+  if (!result.success) {
+    console.error(result.error);
+    return { success: false, post: null };
+  }
+
+  const post: PostType = result.data;
+
+  return { success: true, post };
+};
