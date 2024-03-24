@@ -9,12 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PostType, updatePost } from "@/actions/post";
 import { Loader2 } from "lucide-react";
-import { createPost } from "@/actions/post";
 import { UserType } from "@/lib/nextauth";
-import toast from "react-hot-toast";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 // 入力データの検証ルールを定義
 const schema = z.object({
@@ -25,14 +25,19 @@ const schema = z.object({
 // 入力データの型を定義
 type InputType = z.infer<typeof schema>;
 
-interface PostNewProps {
+interface PostEditProps {
   user: UserType;
+  post: PostType;
 }
 
-// 新規投稿
-const PostNew = ({ user }: PostNewProps) => {
+// 投稿編集
+const PostEdit = ({ user, post }: PostEditProps) => {
   const router = useRouter();
-  const [imageUpload, setImageUpload] = useState<ImageListType>([]);
+  const [imageUpload, setImageUpload] = useState<ImageListType>([
+    {
+      dataURL: post.image || "/noImage.png",
+    },
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   // フォームの状態
@@ -41,8 +46,8 @@ const PostNew = ({ user }: PostNewProps) => {
     resolver: zodResolver(schema),
     // 初期値
     defaultValues: {
-      title: "",
-      content: "",
+      title: post.title || "",
+      content: post.content || "",
     },
   });
 
@@ -51,30 +56,30 @@ const PostNew = ({ user }: PostNewProps) => {
     setIsLoading(true);
     let base64Image;
 
-    if (imageUpload.length) {
+    if (imageUpload[0].dataURL && imageUpload[0].dataURL.startsWith("data:image")) {
       base64Image = imageUpload[0].dataURL;
     }
 
     try {
-      // 新規投稿
-      const res = await createPost({
-        // ユーザーのアクセストークン認証
+      // 投稿編集
+      const res = await updatePost({
         accessToken: user.accessToken,
+        postId: post.uid,
         title: data.title,
         content: data.content,
         image: base64Image,
       });
 
-      if (!res.success || !res.post) {
-        toast.error("投稿に失敗しました");
+      if (!res.success) {
+        toast.error("投稿の編集に失敗しました");
         return;
       }
 
-      toast.success("投稿しました");
-      router.push(`/post/${res.post.uid}`);
+      toast.success("投稿を編集しました");
+      router.push(`/post/${post.uid}`);
       router.refresh();
     } catch (error) {
-      toast.error("投稿に失敗しました");
+      toast.error("投稿の編集に失敗しました");
     } finally {
       setIsLoading(false);
     }
@@ -96,33 +101,19 @@ const PostNew = ({ user }: PostNewProps) => {
 
   return (
     <div>
-      <div className="text-2xl font-bold text-center mb-5">新規投稿</div>
+      <div className="text-2xl font-bold text-center mb-5">投稿編集</div>
       <Form {...form}>
-        <div className="mb-3">
+        <div className="mb-5">
           <FormLabel>サムネイル</FormLabel>
           <div className="mt-2">
-            {/* ここから画像 */}
             <ImageUploading
               value={imageUpload}
               onChange={onChangeImage}
               maxNumber={1}
               acceptType={["jpg", "png", "jpeg"]}
             >
-              {({ imageList, onImageUpload, onImageUpdate, dragProps }) => (
+              {({ imageList, onImageUpdate }) => (
                 <div className="w-full">
-                  {/* 画像が投稿されてない時の処理 */}
-                  {imageList.length == 0 && (
-                    <button
-                      onClick={onImageUpload}
-                      className="w-full border-2 border-dashed rounded-md h-32 hover:bg-gray-50 mb-3"
-                      {...dragProps}
-                    >
-                      <div className="text-gray-400 font-bold mb-2">ファイル選択またはドラッグ＆ドロップ</div>
-                      <div className="text-gray-400 text-xs">ファイル形式：jpg / jpeg / png</div>
-                      <div className="text-gray-400 text-xs">ファイルサイズ：2MBまで</div>
-                    </button>
-                  )}
-
                   {imageList.map((image, index) => (
                     <div key={index}>
                       {image.dataURL && (
@@ -133,7 +124,6 @@ const PostNew = ({ user }: PostNewProps) => {
                     </div>
                   ))}
 
-                  {/* 画像が投稿された時の処理 */}
                   {imageList.length > 0 && (
                     <div className="text-center mt-3">
                       <Button variant="outline" onClick={() => onImageUpdate(0)}>
@@ -178,7 +168,7 @@ const PostNew = ({ user }: PostNewProps) => {
 
           <Button disabled={isLoading} type="submit" className="w-full">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            投稿
+            編集
           </Button>
         </form>
       </Form>
@@ -186,4 +176,4 @@ const PostNew = ({ user }: PostNewProps) => {
   );
 };
 
-export default PostNew;
+export default PostEdit;

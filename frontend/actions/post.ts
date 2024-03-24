@@ -120,3 +120,39 @@ export const createPost = async ({ accessToken, title, content, image }: CreateP
 
   return { success: true, post };
 };
+
+interface UpdatePostType {
+  accessToken: string;
+  postId: string;
+  title: string;
+  content: string;
+  image: string | undefined;
+}
+
+// 投稿編集
+export const updatePost = async ({ accessToken, postId, title, content, image }: UpdatePostType) => {
+  const body = JSON.stringify({
+    title: title,
+    content: content,
+    image: image,
+  });
+
+  const options = {
+    method: "PATCH",
+    headers: {
+      Authorization: `JWT ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body,
+  };
+
+  // 投稿編集を送信
+  const result = await fetchAPI(`/api/posts/${postId}/`, options);
+
+  if (!result.success) {
+    console.error(result.error);
+    return { success: false };
+  }
+
+  return { success: true };
+};

@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { PostType } from "@/actions/post";
 import { UserType } from "@/lib/nextauth";
 import Image from "next/image";
 import Link from "next/link";
-import toast from "react-hot-toast";
 
 interface PostDetailProps {
   post: PostType;
@@ -48,6 +45,16 @@ const PostDetail = ({ post, user }: PostDetailProps) => {
       </div>
 
       <div className="leading-relaxed break-words whitespace-pre-wrap">{post.content}</div>
+
+      {post.user.uid === user?.uid && (
+        <div className="flex items-center justify-end space-x-1">
+          <Link href={`/post/${post.uid}/edit`}>
+            <div className="hover:bg-gray-100 p-2 rounded-full">
+              <Pencil className="w-5 h-5" />
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
